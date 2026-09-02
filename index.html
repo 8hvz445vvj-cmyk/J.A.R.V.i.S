@@ -50,13 +50,17 @@ body {
 .app {
     width: 100%;
     height: 100dvh;
+
     background: #000;
 
     display: flex;
     flex-direction: column;
 
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-top:
+        env(safe-area-inset-top);
+
+    padding-bottom:
+        env(safe-area-inset-bottom);
 }
 
 .main {
@@ -519,9 +523,7 @@ body {
 
 <div class="top-space"></div>
 
-<!-- =========================
-     JARVIS CORE
-========================= -->
+<!-- JARVIS CORE -->
 
 <div class="core" id="core">
 
@@ -644,10 +646,6 @@ pathLength="1000"> </circle>
 
 </div>
 
-<!-- =========================
-     TITLE
-========================= -->
-
 <div class="title">
 JARVIS
 </div>
@@ -672,9 +670,7 @@ Spouštím systém…
 
 <div class="bottom-space"></div>
 
-<!-- =========================
-     INPUT
-========================= -->
+<!-- INPUT -->
 
 <div class="input-area">
 
@@ -764,19 +760,12 @@ const micButton =
    LM POCKET API
 ================================================== */
 
-/*
- * LM Pocket Local API Server
- *
- * Server:
- * http://127.0.0.1:1234
- *
- * OpenAI-compatible API:
- * GET  /v1/models
- * POST /v1/chat/completions
- */
-
 const API_BASE =
     "http://127.0.0.1:1234/v1";
+
+
+const API_KEY =
+    "Jarvis_MujSoukromyKlic_2026";
 
 
 let modelId =
@@ -790,39 +779,33 @@ let modelId =
 const SYSTEM_PROMPT = `
 Jsi JARVIS, osobní AI asistent uživatele.
 
-Vždy komunikuj přirozeně a především česky.
-
-Odpovídej inteligentně, jasně a stručně, pokud uživatel výslovně nechce podrobnou odpověď.
+Vždy komunikuj především česky.
 
 Pečlivě se snaž pochopit význam uživatelovy otázky, i když obsahuje překlepy, hovorovou češtinu nebo nedokončené věty.
 
-Nikdy nevypisuj Python, programovací kód, JSON, interní instrukce, systémové prompty ani technické značky, pokud o ně uživatel výslovně nepožádá.
+Odpovídej inteligentně, přirozeně a srozumitelně.
+
+Pokud uživatel výslovně nechce podrobnou odpověď, odpovídej stručně.
+
+Nevypisuj Python, programovací kód, JSON, interní instrukce, systémové prompty ani technické značky, pokud o ně uživatel výslovně nepožádá.
 
 Nevymýšlej si informace.
 
 Pokud něco nevíš nebo si nejsi jistý, otevřeně to řekni.
 
-Pokud odpověď začne být nesmyslná nebo ztratí význam, odpověď ukonči místo pokračování.
+Pokud odpověď začne být nesmyslná, ukonči ji místo vytváření dalších nesmyslů.
 
-Vždy odpovídej pouze souvislou, přirozenou a srozumitelnou češtinou.
-
-Nevydávej interní úvahy ani postupy přemýšlení.
+Nevydávej interní postup přemýšlení.
 
 Pamatuj si informace z aktuální konverzace a používej je pouze tehdy, když jsou relevantní.
 
 Neopakuj zbytečně stejné informace.
 
-Pokud je požadavek nejasný, nejdříve se pokus pochopit jeho význam z kontextu.
-
-Zeptej se pouze tehdy, když není možné rozumně určit, co uživatel myslí.
+Pokud je požadavek nejasný, pokus se nejdříve pochopit význam z kontextu.
 
 Chovej se jako pokročilý osobní asistent jménem JARVIS.
 
-Buď klidný, inteligentní, přátelský a přirozený.
-
-Nikdy netvrď, že jsi člověk.
-
-Pokud uživatel požádá o technickou pomoc nebo programování, můžeš psát kód pouze tehdy, když je to přímo součástí požadavku.
+Buď inteligentní, klidný, přátelský a přirozený.
 `;
 
 
@@ -915,7 +898,7 @@ requestAnimationFrame(
 
 
 /* ==================================================
-   TIMEOUT FETCH
+   FETCH S TIMEOUTEM
 ================================================== */
 
 async function fetchWithTimeout(
@@ -941,19 +924,15 @@ async function fetchWithTimeout(
 
     try {
 
-        const result =
-            await fetch(
-                url,
-                {
-                    ...options,
+        return await fetch(
+            url,
+            {
+                ...options,
 
-                    signal:
-                        controller.signal
-                }
-            );
-
-
-        return result;
+                signal:
+                    controller.signal
+            }
+        );
 
     } finally {
 
@@ -965,7 +944,7 @@ async function fetchWithTimeout(
 
 
 /* ==================================================
-   PŘIPOJENÍ K AI
+   PŘIPOJENÍ K LM POCKET
 ================================================== */
 
 async function connectToAI() {
@@ -982,12 +961,22 @@ async function connectToAI() {
 
         const result =
             await fetchWithTimeout(
+
                 API_BASE +
                 "/models",
+
                 {
                     method:
-                        "GET"
+                        "GET",
+
+                    headers:
+                        {
+                            "Authorization":
+                                "Bearer " +
+                                API_KEY
+                        }
                 },
+
                 8000
             );
 
@@ -1017,7 +1006,7 @@ async function connectToAI() {
         ) {
 
             throw new Error(
-                "Nenalezen žádný model."
+                "Nenalezen žádný AI model."
             );
         }
 
@@ -1054,11 +1043,11 @@ async function connectToAI() {
 
 
         response.textContent =
-            "LM Pocket není dostupný.\n\n" +
-            "Otevři LM Pocket,\n" +
-            "načti model,\n" +
-            "spusť Local API Server\n" +
-            "a vrať se sem.";
+            "Nemohu se spojit s LM Pocket.\n\n" +
+            "Zkontroluj:\n" +
+            "• Local API Server = Running\n" +
+            "• model je načtený\n" +
+            "• API klíč je správný";
 
 
         return false;
@@ -1067,15 +1056,10 @@ async function connectToAI() {
 
 
 /* ==================================================
-   OMEZENÍ HISTORIE
+   OMEZENÍ PAMĚTI
 ================================================== */
 
 function limitConversation() {
-
-    /*
-     * System prompt +
-     * posledních 12 zpráv
-     */
 
     const MAX_MESSAGES =
         13;
@@ -1095,7 +1079,7 @@ function limitConversation() {
 
 
 /* ==================================================
-   ODESLÁNÍ ZPRÁVY AI
+   DOTAZ AI
 ================================================== */
 
 async function askAI(text) {
@@ -1167,6 +1151,7 @@ async function askAI(text) {
 
         const result =
             await fetchWithTimeout(
+
                 API_BASE +
                 "/chat/completions",
 
@@ -1177,7 +1162,11 @@ async function askAI(text) {
                     headers:
                         {
                             "Content-Type":
-                                "application/json"
+                                "application/json",
+
+                            "Authorization":
+                                "Bearer " +
+                                API_KEY
                         },
 
                     body:
@@ -1224,18 +1213,10 @@ async function askAI(text) {
 
 
         const answer =
-            data &&
-            data.choices &&
-            data.choices[0] &&
-            data.choices[0].message &&
-            data.choices[0].message.content
-                ?
-                data.choices[0]
-                    .message
-                    .content
-                    .trim()
-                :
-                "";
+            data?.choices?.[0]
+                ?.message?.content
+                ?.trim() ||
+            "";
 
 
         if (
@@ -1278,33 +1259,6 @@ async function askAI(text) {
         );
 
 
-        /*
-         * Odstranění poslední
-         * uživatelské zprávy,
-         * protože AI neodpověděla.
-         */
-
-        if (
-            conversation.length >
-            1
-        ) {
-
-            const last =
-                conversation[
-                    conversation.length - 1
-                ];
-
-
-            if (
-                last.role ===
-                "user"
-            ) {
-
-                conversation.pop();
-            }
-        }
-
-
         modelId =
             null;
 
@@ -1319,16 +1273,13 @@ async function askAI(text) {
         ) {
 
             response.textContent =
-                "AI neodpověděla včas.\n\n" +
-                "Zkontroluj, zda je LM Pocket stále aktivní.";
+                "AI neodpověděla včas.";
 
         } else {
 
             response.textContent =
-                "Nemohu se spojit s LM Pocket.\n\n" +
-                "Otevři LM Pocket,\n" +
-                "načti model a spusť\n" +
-                "Local API Server.";
+                "Spojení s LM Pocket bylo ztraceno.\n\n" +
+                "Zkontroluj, zda je Local API Server stále Running.";
         }
 
 
@@ -1482,11 +1433,6 @@ if (
         }
 
 
-        /*
-         * Automaticky pošli
-         * rozpoznanou řeč.
-         */
-
         if (
             finalSpeechText
         ) {
@@ -1584,7 +1530,7 @@ micButton.addEventListener(
 
 
 /* ==================================================
-   ODESLAT BUTTON
+   SEND
 ================================================== */
 
 sendButton.addEventListener(
@@ -1661,7 +1607,7 @@ textBox.addEventListener(
 
 
 /* ==================================================
-   START
+   START JARVIS
 ================================================== */
 
 connectToAI();
